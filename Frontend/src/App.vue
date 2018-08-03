@@ -29,10 +29,7 @@ export default {
   },
   methods: {
     getAccount: function () {
-      this.axios.get('http://localhost:7000/graphql?query={accounts{id,lastname}}').then((response) => {
-        console.log(response.data)
-        this.message = response.data
-      })
+      this.message = 'dude'
     }
   }
 }
