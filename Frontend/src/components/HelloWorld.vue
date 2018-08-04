@@ -1,7 +1,8 @@
 <template>
   <div class="hello">
+    <img src="../assets/logoVue.png">
     <h1>{{ msg }}</h1>
-
+    <canvas id="canvastetris" width="240" height="400"></canvas>
   </div>
 </template>
 
