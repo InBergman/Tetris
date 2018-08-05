@@ -67,7 +67,7 @@ export default {
 			{
 				this.arena.forEach(row => row.fill(0));
 				this.player.score = 0;
-			//	this.updateScore();
+				this.updateScore();
 			}
 		},
 
