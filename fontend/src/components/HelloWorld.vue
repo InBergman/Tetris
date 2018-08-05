@@ -2,6 +2,7 @@
   <div class="hello">
     <img src="../assets/logo.png">
     <h1>{{ msg }}</h1>
+    <div id="score"></div>
     <canvas id="canvastetris" width="240" height="400"></canvas>
   </div>
 </template>

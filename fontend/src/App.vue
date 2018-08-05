@@ -17,6 +17,7 @@ export default {
 			lastTime		: 0,
 			arena			: this.createMatrice(12, 20),
 			player			: {},
+			color			: [null, 'pink', 'red', 'blue', 'purple', 'green', 'yellow', 'grey'],
 			matrice			: [[]]
 		}
 	},
@@ -33,15 +34,14 @@ export default {
 			this.canvas   = document.getElementById('canvastetris');
 			this.context  = this.canvas.getContext('2d');
 			this.player   =  {
-								pos: {x : 5, y : 5},
-								matrice: this.matrice
+								pos: {x : 0, y : 0},
+								matrice: this.matrice,
+								score: 0
 							};
 			this.playerReset();
 			this.context.scale(20, 20);
 			this.context.fillStyle = '#000';
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-			console.log(this.arena);
-			console.table(this.arena);
 			document.addEventListener("keydown", event => {
 				if(event.keyCode === 37)
 					this.playerMove(-1);
@@ -66,6 +66,8 @@ export default {
 			if(this.collider())
 			{
 				this.arena.forEach(row => row.fill(0));
+				this.player.score = 0;
+			//	this.updateScore();
 			}
 		},
 
@@ -79,40 +81,64 @@ export default {
 			}
 			else if(type === 'I') 
 			{
-				return [[0, 1, 0, 0],
-						[0, 1, 0, 0],
-						[0, 1, 0, 0],
-						[0, 1, 0, 0]] 
+				return [[0, 2, 0, 0],
+						[0, 2, 0, 0],
+						[0, 2, 0, 0],
+						[0, 2, 0, 0]] 
 			}
 			else if(type === 'S') 
 			{
-				return [[0, 1, 1],
-						[1, 1, 0],
+				return [[0, 3, 3],
+						[3, 3, 0],
 						[0, 0, 0]] 
 			}
 			else if(type === 'Z') 
 			{
-				return [[1, 1, 0],
-						[0, 1, 1],
+				return [[4, 4, 0],
+						[0, 4, 4],
 						[0, 0, 0]] 
 			}
 			else if(type === 'O') 
 			{
-				return [[1, 1],
-						[1, 1]] 
+				return [[5, 5],
+						[5, 5]] 
 			}
 			else if(type === 'L') 
 			{
-				return [[0, 1, 0],
-						[0, 1, 0],
-						[0, 1, 1]] 
+				return [[0, 6, 0],
+						[0, 6, 0],
+						[0, 6, 6]] 
 			}
 			else if(type === 'J') 
 			{
 				return [[0, 0, 0],
-						[0, 1, 0],
-						[1, 1, 1]] 
+						[0, 7, 0],
+						[7, 7, 7]] 
 			}
+		},
+
+		arenaSweep: function()
+		{
+			let y = this.arena.length;	
+			let count = 1;
+			outer: for(y = this.arena.length - 1; y > 0; --y) 
+					{
+						for(let x = 0; x < this.arena[y].length; ++x)
+						{
+							if(this.arena[y][x] === 0)
+								continue outer;
+						}
+						const newRow = this.arena.splice(y, 1)[0].fill(0);
+						this.arena.unshift(newRow);
+						this.player.score += count * 10; 
+						count *= 2;
+						++y;
+					}
+		},
+
+		updateScore: function()
+		{
+			 document.getElementById("score").innerText = this.player.score;
 		},
 
 		playerRotate: function(dir)
@@ -180,7 +206,8 @@ export default {
 				this.player.pos.y--;
 				this.merge();
 				this.playerReset();
-			//	this.player.pos.y = 0;
+				this.arenaSweep();
+				//this.updateScore();
 			}
 			this.dropCounter = 0;	
 		},
@@ -224,6 +251,7 @@ export default {
 				this.playerDrop();
 			}
 			this.draw();
+			this.updateScore();
 			requestAnimationFrame(this.update)
 		},
 
@@ -233,7 +261,7 @@ export default {
 				row.forEach((value, x) => {
 					if(value !== 0)
 					{
-						this.context.fillStyle = 'red';
+						this.context.fillStyle = this.color[value];
 						this.context.fillRect(x + offset.x,
 												y + offset.y,
 			    								1, 1);
