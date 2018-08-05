@@ -12,19 +12,15 @@ export default {
 	data: function()
 	{
 		return {
-			dropCounter   : 0,
-			dropInterval  : 1000,
-			lastTime      : 0,
-			player: {},
-			matrice: [  [0, 0, 0],
-						[0, 1, 0],
-						[1, 1, 1]  ]
+			dropCounter		: 0,
+			dropInterval	: 1000,
+			lastTime		: 0,
+			arena			: this.createMatrice(12, 20),
+			player			: {},
+			matrice			: [[]]
 		}
 	},
-	components:
-	{
-		HelloWorld
-	},
+	components: { HelloWorld },
 	mounted()
 	{
 		this.init();
@@ -40,28 +36,180 @@ export default {
 								pos: {x : 5, y : 5},
 								matrice: this.matrice
 							};
-
+			this.playerReset();
 			this.context.scale(20, 20);
 			this.context.fillStyle = '#000';
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+			console.log(this.arena);
+			console.table(this.arena);
 			document.addEventListener("keydown", event => {
 				if(event.keyCode === 37)
-				this.player.pos.x--;
+					this.playerMove(-1);
 				else if(event.keyCode === 39)
-				this.player.pos.x++;
+					this.playerMove(1);
 				else if(event.keyCode === 40)
-				{
-				this.player.pos.y++;
-				this.dropCounter = 0;
-				}
+					this.playerDrop();
+				else if(event.keyCode === 81)
+					this.playerRotate(-1);
+				else if(event.keyCode === 87)
+					this.playerRotate( 1);
+					
 			})
-   		},
+		},
+		
+		playerReset: function()
+		{
+			const piece = 'TLZJSOI';
+			this.player.matrice = this.createPiece(piece[piece.length * Math.random() | 0]);
+			this.player.pos.y = 0;
+			this.player.pos.x = (this.arena[0].length / 2 | 0) - (this.player.matrice[0].length / 2 | 0);
+			if(this.collider())
+			{
+				this.arena.forEach(row => row.fill(0));
+			}
+		},
+
+		createPiece: function(type)
+		{
+			if(type === 'T') 
+			{
+				return [[0, 0, 0],
+						[1, 1, 1],
+						[0, 1, 0]] 
+			}
+			else if(type === 'I') 
+			{
+				return [[0, 1, 0, 0],
+						[0, 1, 0, 0],
+						[0, 1, 0, 0],
+						[0, 1, 0, 0]] 
+			}
+			else if(type === 'S') 
+			{
+				return [[0, 1, 1],
+						[1, 1, 0],
+						[0, 0, 0]] 
+			}
+			else if(type === 'Z') 
+			{
+				return [[1, 1, 0],
+						[0, 1, 1],
+						[0, 0, 0]] 
+			}
+			else if(type === 'O') 
+			{
+				return [[1, 1],
+						[1, 1]] 
+			}
+			else if(type === 'L') 
+			{
+				return [[0, 1, 0],
+						[0, 1, 0],
+						[0, 1, 1]] 
+			}
+			else if(type === 'J') 
+			{
+				return [[0, 0, 0],
+						[0, 1, 0],
+						[1, 1, 1]] 
+			}
+		},
+
+		playerRotate: function(dir)
+		{
+			const pos = this.player.pos.x;
+			let offset = 1;
+			this.rotate(this.player.matrice, dir);
+			while(this.collider())
+			{
+				this.player.pos.x += offset;
+				offset = -(offset + (offset > 0 ? 1 : -1));
+				if(offset > this.player.matrice[0].length)
+				{
+					this.rotate(this.player.matrice, -dir);
+					this.player.pos.x = pos;
+					return;
+				}
+			}
+		},
+
+		rotate: function(matrice, dir)
+		{
+			for (let y = 0; y < matrice.length; ++y)
+			{	
+				for (let x = 0; x < y; ++x)
+				{
+					[ matrice[x][y], matrice[y][x] ] = [ matrice[y][x], matrice[x][y] ]
+				}
+			}
+			if(dir > 0)
+				matrice.forEach(row => row.reverse());
+			else
+				matrice.reverse();
+		},
+
+		playerMove: function(dir)
+		{
+			this.player.pos.x += dir;
+			if(this.collider())
+				this.player.pos.x -= dir;
+		},
+
+		collider: function()
+		{
+			const [mat, pos] = [this.player.matrice, this.player.pos];
+
+			for (let y = 0; y < mat.length; ++y)
+			{	
+				for (let x = 0; x < mat[y].length; ++x)
+				{
+					if (mat[y][x] !== 0 &&  (this.arena[y + pos.y] && this.arena[y + pos.y][x + pos.x]) !== 0) 
+					{
+						return true
+					}
+				}	
+			}
+			return false
+		},
+
+		playerDrop: function()
+		{
+			this.player.pos.y++;
+			if (this.collider())
+			{
+				this.player.pos.y--;
+				this.merge();
+				this.playerReset();
+			//	this.player.pos.y = 0;
+			}
+			this.dropCounter = 0;	
+		},
+
+		merge: function()
+		{
+			this.player.matrice.forEach((row, y) => {
+				row.forEach((value, x) => {
+					if(value !== 0)
+					{
+						this.arena[y + this.player.pos.y][x + this.player.pos.x] = value;
+					}
+				})
+			})
+		},
+
+		createMatrice: function(w, h)
+		{
+			const newMatrice = [];
+			while(h--)
+				newMatrice.push(new Array(w).fill(0));
+			return newMatrice;
+		},
 
 		draw: function()
 		{
 			this.context.fillStyle = '#000';
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
+			this.drawMatrice(this.arena, {x:0, y:0});
 			this.drawMatrice(this.player.matrice, this.player.pos);
 		},
 
@@ -73,8 +221,7 @@ export default {
 			this.dropCounter += deltaTime;
 			if(this.dropCounter > this.dropInterval)
 			{
-				this.player.pos.y++;
-				this.dropCounter = 0;
+				this.playerDrop();
 			}
 			this.draw();
 			requestAnimationFrame(this.update)
@@ -82,17 +229,17 @@ export default {
 
 		drawMatrice: function(matrice, offset)
 		{
-			this.matrice.forEach((row, x) => {
-				row.forEach((col, y) => {
-				if(col === 1)
-				{
-					this.context.fillStyle = 'red';
-					this.context.fillRect(x + offset.x,
-										y + offset.y,
-										1, 1);
-				}
+			matrice.forEach((row, y) => {
+				row.forEach((value, x) => {
+					if(value !== 0)
+					{
+						this.context.fillStyle = 'red';
+						this.context.fillRect(x + offset.x,
+												y + offset.y,
+			    								1, 1);
+					}
 				})
-			})
+		})
 		}
 	}
 }
