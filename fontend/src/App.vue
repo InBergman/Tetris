@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<HelloWorld msg="Tetris Game"/>
+		<HelloWorld msg="Tetris"/>
 	</div>
 </template>
 
@@ -17,7 +17,7 @@ export default {
 			lastTime		: 0,
 			arena			: this.createMatrice(12, 20),
 			player			: {},
-			color			: [null, 'pink', 'red', 'blue', 'purple', 'green', 'yellow', 'grey'],
+			color			: [null, 'HotPink', 'Yellow', 'Lime', 'purple', 'DeepSkyBlue', 'Aqua', 'SpringGreen'],
 			matrice			: [[]]
 		}
 	},

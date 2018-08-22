@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <img src="../assets/logo.png">
+    <img src="../assets/logoTetris.png">
     <h1>{{ msg }}</h1>
     <div id="score"></div>
     <canvas id="canvastetris" width="240" height="400"></canvas>
@@ -17,7 +17,16 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
+img {
+      height: 200px;
+      width: 200px;
+}
+
+ html {
+   border : 4px solid Fuchsia;
+    background-image: linear-gradient(MediumSpringGreen, Aqua);
+}
 h3 {
   margin: 40px 0 0;
 }
